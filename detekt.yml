@@ -1,0 +1,36 @@
+build:
+  maxIssues: 100
+
+complexity:
+  LongMethod:
+    active: true
+    threshold: 60
+
+  ComplexMethod:
+    active: true
+    threshold: 15
+
+  LargeClass:
+    active: true
+    threshold: 300
+
+style:
+  MagicNumber:
+    active: true
+    ignoreNumbers: ['0','1']
+
+  WildcardImport:
+    active: true
+
+  UnusedImports:
+    active: true
+
+potential-bugs:
+  UnsafeCallOnNullableType:
+    active: true
+
+  UnreachableCode:
+    active: true
+
+  EqualsAlwaysReturnsTrueOrFalse:
+    active: true

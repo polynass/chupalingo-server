@@ -5,13 +5,14 @@ import com.zaxxer.hikari.HikariDataSource
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
+import tables.UserStatisticsTable
 import tables.Users
 import tables.Words
-import tables.UserStatisticsTable
 import java.sql.Connection
 
-object DatabaseFactory {
+private const val MAX_POOL_SIZE = 10
 
+object DatabaseFactory {
     private lateinit var dataSource: HikariDataSource
 
     fun init() {
@@ -20,24 +21,16 @@ object DatabaseFactory {
             driverClassName = "org.postgresql.Driver"
             username = "postgres"
             password = "password"
-            maximumPoolSize = 10
+            maximumPoolSize = MAX_POOL_SIZE
         }
-
         dataSource = HikariDataSource(config)
-
         Database.connect(dataSource)
     }
 
-    fun createTables() {
-        transaction {
-            SchemaUtils.create(Users, Words, UserStatisticsTable)
-        }
-    }
+    fun createTables() = transaction { SchemaUtils.create(Users, Words, UserStatisticsTable) }
 
     fun getConnection(): Connection {
-        if (!::dataSource.isInitialized) {
-            throw IllegalStateException("DataSource is not initialized. Call init() first.")
-        }
+        check(::dataSource.isInitialized) { "DataSource is not initialized. Call init() first." }
         return dataSource.connection
     }
 }

@@ -1,6 +1,9 @@
 plugins {
-    kotlin("jvm") version "1.9.0" // Исправлено: синхронизация версий
-    kotlin("plugin.serialization") version "1.9.0" // Теперь совпадает с Kotlin
+    kotlin("jvm") version "1.9.0"
+    kotlin("plugin.serialization") version "1.9.0"
+
+    id("io.gitlab.arturbosch.detekt") version "1.23.6"
+    id("org.jlleitschuh.gradle.ktlint") version "11.6.1"
 }
 
 group = "org.example"
@@ -47,4 +50,9 @@ tasks.test {
 
 kotlin {
     jvmToolchain(17) // Исправлено: Java 17 (LTS версия)
+}
+
+detekt {
+    config = files("detekt.yml")
+    buildUponDefaultConfig = true
 }
