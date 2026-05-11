@@ -16,8 +16,21 @@ import utils.PasswordHasher
 import utils.TokenManager.generateToken
 
 fun Route.authRoutes() {
+
+    fun isValidCredentials(username: String, password: String): Boolean {
+        return username.isNotBlank() &&
+                password.isNotBlank() &&
+                password.length in 6..64
+    }
+
     post("/register") {
         val credentials = call.receive<User>()
+
+        if (!isValidCredentials(credentials.username, credentials.password)) {
+            call.respond(HttpStatusCode.BadRequest, "Invalid username or password")
+            return@post
+        }
+
         val hashedPassword = PasswordHasher.hash(credentials.password)
 
         if (Users.getUser(credentials.username) != null) {
@@ -30,6 +43,12 @@ fun Route.authRoutes() {
 
     post("/login") {
         val credentials = call.receive<User>()
+
+        if (!isValidCredentials(credentials.username, credentials.password)) {
+            call.respond(HttpStatusCode.BadRequest, "Invalid username or password")
+            return@post
+        }
+
         val user = Users.getUser(credentials.username)
 
         if (user != null && PasswordHasher.verify(credentials.password, user[Users.passwordHash])) {

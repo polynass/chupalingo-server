@@ -39,9 +39,10 @@ private suspend fun respondStatistics(call: ApplicationCall) {
 
 private suspend fun updateStatistics(call: ApplicationCall) {
     val userId = getAuthenticatedUserId(call) ?: return
-    val learnedWords = call.request.queryParameters["learnedWords"]?.toIntOrNull() ?: 0
-    val solvedTests = call.request.queryParameters["solvedTests"]?.toIntOrNull() ?: 0
-    val mistakes = call.request.queryParameters["mistakes"]?.toIntOrNull() ?: 0
+
+    val learnedWords = call.request.queryParameters["learnedWords"]?.toIntOrNull()?.coerceAtLeast(0) ?: 0
+    val solvedTests = call.request.queryParameters["solvedTests"]?.toIntOrNull()?.coerceAtLeast(0) ?: 0
+    val mistakes = call.request.queryParameters["mistakes"]?.toIntOrNull()?.coerceAtLeast(0) ?: 0
 
     UserStatisticsTable.updateStatistics(userId, learnedWords, solvedTests, mistakes)
     call.respond(HttpStatusCode.OK, "Statistics updated")
@@ -86,6 +87,7 @@ private suspend fun incrementMistakes(call: ApplicationCall) {
 private suspend fun getAuthenticatedUserId(call: ApplicationCall): String? {
     val principal = call.principal<JWTPrincipal>()
     val userId = principal?.payload?.getClaim("username")?.asString()
+
     if (userId == null) {
         call.respond(HttpStatusCode.Unauthorized, "User not authenticated")
         return null

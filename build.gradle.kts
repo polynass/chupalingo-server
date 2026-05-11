@@ -42,6 +42,11 @@ dependencies {
 
     // Testing
     testImplementation("io.ktor:ktor-server-test-host:2.3.11")
+
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+
+    testImplementation("com.h2database:h2:2.2.224")
+
 }
 
 tasks.test {

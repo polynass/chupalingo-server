@@ -42,7 +42,10 @@ fun Application.module() {
             realm = "german_words_server"
             verifier(verifier)
             validate { credential ->
-                if (credential.payload.getClaim("username").asString() != null) {
+                val username = credential.payload.getClaim("username").asString()
+                val expiresAt = credential.payload.expiresAt
+
+                if (username != null && expiresAt != null && expiresAt.after(java.util.Date())) {
                     JWTPrincipal(credential.payload)
                 } else {
                     null

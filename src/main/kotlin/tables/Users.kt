@@ -17,13 +17,18 @@ object Users : Table("users") {
     val passwordHash: Column<String> = varchar("password_hash", PASSWORD_HASH_MAX)
     val token: Column<String?> = varchar("token", TOKEN_MAX).nullable()
 
-    fun getUser(username: String): ResultRow? = transaction { select { Users.username eq username }.singleOrNull() }
+    fun getUser(username: String): ResultRow? =
+        transaction { select { Users.username eq username }.singleOrNull() }
 
     fun updateToken(username: String, token: String?) =
         transaction { update({ Users.username eq username }) { it[Users.token] = token } }
 
     fun updatePassword(username: String, newPasswordHash: String): Boolean =
-        transaction { update({ Users.username eq username }) { it[passwordHash] = newPasswordHash } > 0 }
+        transaction {
+            update({ Users.username eq username }) {
+                it[passwordHash] = newPasswordHash
+            } > 0
+        }
 
     fun updateUsername(oldUsername: String, newUsername: String): Boolean = transaction {
         if (userExists(newUsername)) {
@@ -34,7 +39,10 @@ object Users : Table("users") {
     }
 
     fun insertUser(username: String, passwordHash: String) = transaction {
-        insert { it[Users.username] = username; it[Users.passwordHash] = passwordHash; it[token] = null }
+        insert {
+            it[Users.username] = username
+            it[Users.passwordHash] = passwordHash
+        }
     }
 
     private fun userExists(username: String): Boolean =

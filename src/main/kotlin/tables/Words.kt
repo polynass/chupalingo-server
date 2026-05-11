@@ -49,37 +49,35 @@ object Words : Table("words") {
     }
 
     fun getRandomWord(): Word? {
-        val connection: Connection = DatabaseFactory.getConnection()
-        val query = "SELECT * FROM words ORDER BY RANDOM() LIMIT 1"
-        val statement: PreparedStatement = connection.prepareStatement(query)
-        val resultSet = statement.executeQuery()
-        val word = if (resultSet.next()) {
-            Word(
-                id = resultSet.getInt("id"),
-                word = resultSet.getString("word"),
-                translation = resultSet.getString("translation")
-            )
-        } else {
-            null
+        return DatabaseFactory.getConnection().use { connection ->
+            val query = "SELECT * FROM words ORDER BY RANDOM() LIMIT 1"
+            connection.prepareStatement(query).use { statement ->
+                val resultSet = statement.executeQuery()
+                if (resultSet.next()) {
+                    Word(
+                        id = resultSet.getInt("id"),
+                        word = resultSet.getString("word"),
+                        translation = resultSet.getString("translation")
+                    )
+                } else null
+            }
         }
-        resultSet.close()
-        statement.close()
-        connection.close()
-        return word
     }
 
     fun getRandomTranslations(excludeTranslation: String, limit: Int = 3): List<String> {
-        val connection: Connection = DatabaseFactory.getConnection()
-        val query = "SELECT translation FROM words WHERE translation != ? ORDER BY RANDOM() LIMIT ?"
-        val statement: PreparedStatement = connection.prepareStatement(query)
-        statement.setString(1, excludeTranslation)
-        statement.setInt(PARAMETER_INDEX, limit)
-        val translations = mutableListOf<String>()
-        val resultSet = statement.executeQuery()
-        while (resultSet.next()) translations.add(resultSet.getString("translation"))
-        resultSet.close()
-        statement.close()
-        connection.close()
-        return translations
+        return DatabaseFactory.getConnection().use { connection ->
+            val query = "SELECT translation FROM words WHERE translation != ? ORDER BY RANDOM() LIMIT ?"
+            connection.prepareStatement(query).use { statement ->
+                statement.setString(1, excludeTranslation)
+                statement.setInt(2, limit) // ✔ исправлено
+
+                val resultSet = statement.executeQuery()
+                val translations = mutableListOf<String>()
+                while (resultSet.next()) {
+                    translations.add(resultSet.getString("translation"))
+                }
+                translations
+            }
+        }
     }
 }
